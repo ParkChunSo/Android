@@ -38,8 +38,6 @@
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.label1 = new System.Windows.Forms.Label();
             this.cb_modeSelect = new System.Windows.Forms.ComboBox();
-            this.tbx_fileNmae = new System.Windows.Forms.TextBox();
-            this.label2 = new System.Windows.Forms.Label();
             this.groupBox3.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox1.SuspendLayout();
@@ -48,9 +46,9 @@
             // btn_convert
             // 
             this.btn_convert.Font = new System.Drawing.Font("굴림", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
-            this.btn_convert.Location = new System.Drawing.Point(424, 218);
+            this.btn_convert.Location = new System.Drawing.Point(242, 258);
             this.btn_convert.Name = "btn_convert";
-            this.btn_convert.Size = new System.Drawing.Size(171, 67);
+            this.btn_convert.Size = new System.Drawing.Size(171, 32);
             this.btn_convert.TabIndex = 15;
             this.btn_convert.Text = "변환";
             this.btn_convert.UseVisualStyleBackColor = true;
@@ -82,7 +80,7 @@
             this.groupBox2.Controls.Add(this.btn_addFiles);
             this.groupBox2.Controls.Add(this.btn_removeFiles);
             this.groupBox2.Controls.Add(this.btn_clearList);
-            this.groupBox2.Location = new System.Drawing.Point(252, 130);
+            this.groupBox2.Location = new System.Drawing.Point(252, 97);
             this.groupBox2.Name = "groupBox2";
             this.groupBox2.Size = new System.Drawing.Size(161, 155);
             this.groupBox2.TabIndex = 13;
@@ -159,29 +157,11 @@
             this.cb_modeSelect.TabIndex = 1;
             this.cb_modeSelect.SelectedIndexChanged += new System.EventHandler(this.cb_modeSelect_SelectedIndexChanged);
             // 
-            // tbx_fileNmae
-            // 
-            this.tbx_fileNmae.Location = new System.Drawing.Point(434, 30);
-            this.tbx_fileNmae.Name = "tbx_fileNmae";
-            this.tbx_fileNmae.Size = new System.Drawing.Size(142, 21);
-            this.tbx_fileNmae.TabIndex = 0;
-            // 
-            // label2
-            // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(432, 15);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(57, 12);
-            this.label2.TabIndex = 1;
-            this.label2.Text = "파일 제목";
-            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(607, 298);
-            this.Controls.Add(this.label2);
-            this.Controls.Add(this.tbx_fileNmae);
+            this.ClientSize = new System.Drawing.Size(426, 298);
             this.Controls.Add(this.btn_convert);
             this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.groupBox2);
@@ -193,7 +173,6 @@
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
             this.ResumeLayout(false);
-            this.PerformLayout();
 
         }
 
@@ -209,8 +188,6 @@
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.ComboBox cb_modeSelect;
-        private System.Windows.Forms.TextBox tbx_fileNmae;
-        private System.Windows.Forms.Label label2;
     }
 }
 

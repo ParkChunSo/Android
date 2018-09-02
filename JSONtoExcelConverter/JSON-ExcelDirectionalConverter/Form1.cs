@@ -25,7 +25,6 @@ namespace JSON_ExcelDirectionalConverter
             btn_clearList.Enabled = false;
             btn_convert.Enabled = false;
             btn_removeFiles.Enabled = false;
-            tbx_fileNmae.Enabled = false;
 
             filePathList = new List<string>();
         }
@@ -36,7 +35,7 @@ namespace JSON_ExcelDirectionalConverter
             btn_clearList.Enabled = true;
             btn_convert.Enabled = true;
             btn_removeFiles.Enabled = true;
-            tbx_fileNmae.Enabled = true;
+            
 
             lb_fileList.Items.Clear();
             filePathList.Clear();
@@ -115,7 +114,7 @@ namespace JSON_ExcelDirectionalConverter
 
                 Cursor.Current = Cursors.WaitCursor;
 
-                CrossJEConverter_v2 jeConverter = new CrossJEConverter_v2(currentCuonvertingMode, tbx_fileNmae.Text);
+                CrossJEConverter_v2 jeConverter = new CrossJEConverter_v2(currentCuonvertingMode, null);
                 MessageBox.Show(jeConverter.convertFiles(filePathList));
 
                 Cursor.Current = Cursors.Default;
