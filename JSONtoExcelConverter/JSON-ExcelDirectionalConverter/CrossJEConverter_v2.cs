@@ -430,8 +430,8 @@ namespace JSON_ExcelDirectionalConverter
                         // ** sheet1, sheet2 object 이중배열의 데이터를 JSON 태그 클래스의 객체에 입력
                         // * topTag 객체 데이터 입력
                         EtopTag = new ETRI_TopTag();
-                        EtopTag.version = sheet2ValueArray[2, 2] == null ? null : sheet2ValueArray[2, 2].ToString();
-                        EtopTag.creator = sheet2ValueArray[2, 3] == null ? null : sheet2ValueArray[2, 3].ToString();
+                        EtopTag.version = sheet2ValueArray[2, 2] == null ? "" : sheet2ValueArray[2, 2].ToString();
+                        EtopTag.creator = sheet2ValueArray[2, 3] == null ? "" : sheet2ValueArray[2, 3].ToString();
                         
                         EtopTag.data = new List<object>();
 
@@ -467,9 +467,9 @@ namespace JSON_ExcelDirectionalConverter
                         for (int r = 2; r <= sheet2ValueArray.GetLength(0); r++)
                         {
                             ETRI_Paragraphs tempParagraphs = new ETRI_Paragraphs();
-                            tempParagraphs.context = sheet2ValueArray[r, 11] == null ? null : sheet2ValueArray[r, 11].ToString();
-                            tempParagraphs.context_en = sheet2ValueArray[r, 12] == null ? null : sheet2ValueArray[r, 12].ToString();
-                            tempParagraphs.context_tagged = sheet2ValueArray[r, 13] == null ? null : sheet2ValueArray[r, 13].ToString();
+                            tempParagraphs.context = sheet2ValueArray[r, 11] == null ? "" : sheet2ValueArray[r, 11].ToString();
+                            tempParagraphs.context_en = sheet2ValueArray[r, 12] == null ? "" : sheet2ValueArray[r, 12].ToString();
+                            tempParagraphs.context_tagged = sheet2ValueArray[r, 13] == null ? "" : sheet2ValueArray[r, 13].ToString();
                             tempParagraphs.qas = new List<object>();
 
                             if (sheet2ValueArray[r, 10] == null || sheet2ValueArray[r, 7].ToString() == "")
@@ -479,7 +479,7 @@ namespace JSON_ExcelDirectionalConverter
                                     dataCount++;
                                 }
                                 tempDataList[dataCount].paragraphs.Add(tempParagraphs);
-                                currentTitle = sheet2ValueArray[r, 10] == null ? null : sheet2ValueArray[r, 7].ToString();
+                                currentTitle = sheet2ValueArray[r, 10] == null ? "" : sheet2ValueArray[r, 7].ToString();
                             }
                             else if (sheet2ValueArray[r, 10] == currentTitle)
                             {
@@ -503,21 +503,21 @@ namespace JSON_ExcelDirectionalConverter
                         for (int r = 2; r <= sheet1ValueArray.GetLength(0); r++)
                         {
                             ETRI_Qas tempQas = new ETRI_Qas();
-                            tempQas.id = sheet1ValueArray[r, 2] == null ? null : sheet1ValueArray[r, 2].ToString();
-                            tempQas.question = sheet1ValueArray[r, 7] == null ? null : sheet1ValueArray[r, 7].ToString();
-                            tempQas.question_en = sheet1ValueArray[r, 8] == null ? null : sheet1ValueArray[r, 8].ToString();
-                            tempQas.question_tagged = sheet1ValueArray[r, 27] == null ? null : sheet1ValueArray[r, 27].ToString();
-                            tempQas.questionType = sheet1ValueArray[r, 28] == null ? null : sheet1ValueArray[r, 28].ToString();
-                            tempQas.questionFocus = sheet1ValueArray[r, 29] == null ? null : sheet1ValueArray[r, 29].ToString();
-                            tempQas.questionSAT = sheet1ValueArray[r, 30] == null ? null : sheet1ValueArray[r, 30].ToString();
-                            tempQas.questionLAT = sheet1ValueArray[r, 31] == null ? null : sheet1ValueArray[r, 31].ToString();
+                            tempQas.id = sheet1ValueArray[r, 2] == null ? "" : sheet1ValueArray[r, 2].ToString();
+                            tempQas.question = sheet1ValueArray[r, 7] == null ? "" : sheet1ValueArray[r, 7].ToString();
+                            tempQas.question_en = sheet1ValueArray[r, 8] == null ? "" : sheet1ValueArray[r, 8].ToString();
+                            tempQas.question_tagged = sheet1ValueArray[r, 27] == null ? "" : sheet1ValueArray[r, 27].ToString();
+                            tempQas.questionType = sheet1ValueArray[r, 28] == null ? "" : sheet1ValueArray[r, 28].ToString();
+                            tempQas.questionFocus = sheet1ValueArray[r, 29] == null ? "" : sheet1ValueArray[r, 29].ToString();
+                            tempQas.questionSAT = sheet1ValueArray[r, 30] == null ? "" : sheet1ValueArray[r, 30].ToString();
+                            tempQas.questionLAT = sheet1ValueArray[r, 31] == null ? "" : sheet1ValueArray[r, 31].ToString();
 
                             int ansStartColNum = 32;
                             ETRI_Answers tempAnswers = new ETRI_Answers();
-                            tempAnswers.text = sheet1ValueArray[r, ansStartColNum] == null ? null : sheet1ValueArray[r, ansStartColNum].ToString();
-                            tempAnswers.text_en = sheet1ValueArray[r, ansStartColNum + 1] == null ? null : sheet1ValueArray[r, ansStartColNum + 1].ToString();
-                            tempAnswers.text_tagged = sheet1ValueArray[r, ansStartColNum + 2] == null ? null : sheet1ValueArray[r, ansStartColNum + 2].ToString();
-                            tempAnswers.text_syn = sheet1ValueArray[r, ansStartColNum + 3] == null ? null : sheet1ValueArray[r, ansStartColNum + 3].ToString();
+                            tempAnswers.text = sheet1ValueArray[r, ansStartColNum] == null ? "" : sheet1ValueArray[r, ansStartColNum].ToString();
+                            tempAnswers.text_en = sheet1ValueArray[r, ansStartColNum + 1] == null ? "" : sheet1ValueArray[r, ansStartColNum + 1].ToString();
+                            tempAnswers.text_tagged = sheet1ValueArray[r, ansStartColNum + 2] == null ? "" : sheet1ValueArray[r, ansStartColNum + 2].ToString();
+                            tempAnswers.text_syn = sheet1ValueArray[r, ansStartColNum + 3] == null ? "" : sheet1ValueArray[r, ansStartColNum + 3].ToString();
                             tempAnswers.answer_start = Convert.ToInt32(sheet1ValueArray[r, ansStartColNum + 4]);
                             tempAnswers.answer_end = Convert.ToInt32(sheet1ValueArray[r, ansStartColNum + 5]);
 
