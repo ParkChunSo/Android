@@ -8,7 +8,7 @@ namespace JSON_ExcelDirectionalConverter.WtagClasses
 {
     public class TopName
     {
-        public double time { get; set; }
+        //public double time { get; set; }
         public string formatt { get; set; }
         public int progress { get; set; }
         public string version { get; set; }

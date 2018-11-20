@@ -13,6 +13,7 @@ namespace JSON_ExcelDirectionalConverter.WtagClasses
         public bool confuseQf { get; set; }
         public bool confuseSat { get; set; }
         public bool confuseLat { get; set; }
+        public double time { get; set; }//추가
 
         public string id { get; set; }
         public string question { get; set; }
@@ -32,6 +33,7 @@ namespace JSON_ExcelDirectionalConverter.WtagClasses
         public string etriQf { get; set; }//추가
         public string etriLat { get; set; }//추가
         public string etriSat { get; set; }//추가
+        public bool checkIndividual { get; set; }//추가
        
 
 

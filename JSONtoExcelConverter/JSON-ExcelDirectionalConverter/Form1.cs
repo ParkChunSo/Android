@@ -122,7 +122,8 @@ namespace JSON_ExcelDirectionalConverter
             {
                 Cursor.Current = Cursors.WaitCursor;
 
-                WorkJEConverter jeConverter = new WorkJEConverter(currentCuonvertingMode);
+
+                WorkJEConverter jeConverter = new WorkJEConverter(currentCuonvertingMode, false);
                 MessageBox.Show(jeConverter.convertFiles(filePathList));
 
                 Cursor.Current = Cursors.Default;

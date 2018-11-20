@@ -10,6 +10,7 @@ using Excel = Microsoft.Office.Interop.Excel;
 using System.Runtime.InteropServices;
 using System.Drawing;
 using System.Windows.Forms;
+using JSON_ExcelDirectionalConverter;
 using JSON_ExcelDirectionalConverter.WtagClasses;
 
 namespace JSON_ExcelDirectionalConverter
@@ -22,14 +23,26 @@ namespace JSON_ExcelDirectionalConverter
         private string m_path;
         private string m_savePath;
 
-        private bool m_EtoJNullRemoveCheck = false;
-        
+        private bool m_EtoJNullRemoveCheck;
+
+        private int dataCount = 0;
+        private int paragraphCount = 0;
+        object currentTitle;
+
+        // Excel 파일 컬럼 헤더값 설정
+        //private static string[] sheet1ColHeader = {"number", "confuse", "id", "question", "question_original",
+        //                                             "question_en", "question_tagged", "questionType", "questionFocus", "questionSAT",
+        //                                             "questionLAT", "ans_text1", "ans_text_original1", "ans_text_en1", "ans_text_tagged1",
+        //                                             "ans_text_syn1", "ans_start1", "ans_end1", "ans_text2", "ans_text_original2", "ans_text_en2", "ans_text_tagged2",
+        //                                             "ans_text_syn2", "ans_start2", "ans_end2","ans_text3", "ans_text_original3", "ans_text_en3", "ans_text_tagged3",
+        //                                             "ans_text_syn3", "ans_start3", "ans_end3", "paragraphs_num"};
+
         private static string[] sheet1ColHeader = {"number", "id", "confuseQt","confuseQf","confuseLat","confuseSat","question",
                                                      "question_en","question_tagged", "questionType", "questionFocus", "questionSAT",
                                                      "questionLAT", "etriQtCheck","etriQfCheck","etriLatCheck","etriSatCheck","etriQt","etriQf","etriLat","etriSat", "ans_text1", "ans_text_en1", "ans_text_tagged1",
                                                      "ans_text_syn1", "ans_start1", "ans_end1", "ans_text2", "ans_text_en2", "ans_text_tagged2",
                                                      "ans_text_syn2", "ans_start2", "ans_end2","ans_text3", "ans_text_en3", "ans_text_tagged3",
-                                                     "ans_text_syn3", "ans_start3", "ans_end3", "paragraphs_num"};
+                                                     "ans_text_syn3", "ans_start3", "ans_end3", "paragraphs_num","time","checkIndividual"};
 
         private int sheet1ColCount = sheet1ColHeader.Length;
         private int sheet1RowCount;
@@ -49,11 +62,12 @@ namespace JSON_ExcelDirectionalConverter
 
         private Excel.XlHAlign HCENTER = Excel.XlHAlign.xlHAlignCenter;
 
-        public WorkJEConverter(convertingMode mode)
+        public WorkJEConverter(convertingMode mode, bool EtoJNullRemoveCheck)
         {
             m_currentConvertingMode = mode;
             sheet1RowCount = 0;
             sheet2RowCount = 0;
+            m_EtoJNullRemoveCheck = EtoJNullRemoveCheck;
         }
 
         public string convertFiles(IList<string> filePaths)
@@ -332,7 +346,7 @@ namespace JSON_ExcelDirectionalConverter
                         sheet2ValueArray[row, 2] = topName.creator;
                         sheet2ValueArray[row, 3] = topName.progress;
                         sheet2ValueArray[row, 4] = topName.formatt;
-                        sheet2ValueArray[row, 5] = topName.time;
+                        //sheet2ValueArray[row, 5] = topName.time;
                         //sheet2ValueArray[row, 0] = row + 1;
                         //sheet2ValueArray[row, 1] = topName.time;
                         //sheet2ValueArray[row, 2] = topName.formatt;
@@ -414,6 +428,9 @@ namespace JSON_ExcelDirectionalConverter
                                 sheet1ValueArray[currentRow, 20] = qas[d][p][q].etriSat;//
 
                                 sheet1ValueArray[currentRow, 39] = currentParaNum;
+                                //////////////////////////////////////////////////
+                                sheet1ValueArray[currentRow, 40] = qas[d][p][q].time;
+                                sheet1ValueArray[currentRow, 41] = qas[d][p][q].checkIndividual;
 
                                 //if (qas[d][p][q].question_tagged == null)
                                 //{
@@ -556,7 +573,7 @@ namespace JSON_ExcelDirectionalConverter
                     objWorksheet = (Excel.Worksheet)objWorksheets.Add(missing, missing, missing, missing);
                     objWorksheet.Name = "Qas";
 
-                    range = objWorksheet.get_Range("A1", "AN1");
+                    range = objWorksheet.get_Range("A1", "AP1");
                     range.HorizontalAlignment = HCENTER;
                     range.Interior.Color = Color.FromArgb(142, 169, 219);
                     range.Value2 = sheet1ColHeader;
@@ -597,7 +614,7 @@ namespace JSON_ExcelDirectionalConverter
                     excelOpen = false;
                     #endregion
                 }
-                else
+                else if (m_currentConvertingMode == convertingMode.WExcelToWJSON)
                 {
                     #region Excel -> JSON 변환
 
@@ -638,205 +655,221 @@ namespace JSON_ExcelDirectionalConverter
                     topName.creator = sheet2ValueArray[2, 3] == null ? null : sheet2ValueArray[2, 3].ToString();
                     topName.progress = Convert.ToInt32(sheet2ValueArray[2, 4]);
                     topName.formatt = sheet2ValueArray[2, 5] == null ? null : sheet2ValueArray[2, 5].ToString();
-                    topName.time = Convert.ToDouble(sheet2ValueArray[2, 6]);
+                    //topName.time = Convert.ToDouble(sheet2ValueArray[2, 6]);
                     topName.data = new List<object>();
-
-                    // * TopName 객체 내의 Data 객체 리스트 입력
-                    IList<object> titleList = new List<object>();
-                    for (int r = 2; r <= sheet2ValueArray.GetLength(0); r++)
+                    
+                    ///////////////////////
+                    try
                     {
-                        object tempTitle = sheet2ValueArray[r, 7];
-                        if (!titleList.Any())   // 리스트에 아무것도 없을때 (=맨처음)
+                        // * TopName 객체 내의 Data 객체 리스트 입력
+                        IList<object> titleList = new List<object>();
+                        for (int r = 2; r <= sheet2ValueArray.GetLength(0); r++)
                         {
-                            titleList.Add(tempTitle);
-                        }
-                        else if (tempTitle == null)  // null 이거나 "" 일 때 tempTitle == ""
-                        {
-                            titleList.Add(tempTitle);
-                        }
-                        else if (titleList.Contains(tempTitle)) // 타이틀 이미 입력됨(통과)
-                        {
-                            continue;
-                        }
-
-                        Data tempData = new Data();
-                        tempData.title = tempTitle == null ? "" : tempTitle.ToString();
-                        tempData.paragraphs = new List<object>();
-
-                        topName.data.Add(tempData);
-                    }
-
-                    // * TopName->Data 객체 리스트 내의 Paragraphs 객체 리스트 입력
-                    int dataCount = 0;
-                    object currentTitle = sheet2ValueArray[2, 7];
-                    List<Data> tempDataList = topName.data.Cast<Data>().ToList();
-                    for (int r = 2; r <= sheet2ValueArray.GetLength(0); r++)
-                    {
-                        Paragraphs tempParagraphs = new Paragraphs();
-                        tempParagraphs.context = sheet2ValueArray[r, 8] == null ? null : sheet2ValueArray[r, 8].ToString();
-                        //tempParagraphs.context_original = sheet2ValueArray[r, 9] == null ? null : sheet2ValueArray[r, 9].ToString();
-                        tempParagraphs.context_en = sheet2ValueArray[r, 9] == null ? null : sheet2ValueArray[r, 9].ToString();
-                        tempParagraphs.context_tagged = sheet2ValueArray[r, 10] == null ? null : sheet2ValueArray[r, 10].ToString();
-                        //if (sheet2ValueArray[r, 11] == null)
-                        //{
-                        //    tempParagraphs.context_tagged = null;
-                        //}
-                        //else
-                        //{
-                        //    //tempParagraphs.context_tagged = new List<string>();
-                        //    string[] tempTagged = sheet2ValueArray[r, 11].ToString().Split(':');
-                        //    foreach (var item in tempTagged)
-                        //    {
-                        //        tempParagraphs.context_tagged.Add(item);
-                        //    }
-                        //}
-                        tempParagraphs.qas = new List<object>();
-
-                        if (sheet2ValueArray[r, 7] == null || sheet2ValueArray[r, 7].ToString() == "")
-                        {
-                            if (r != 2)
-                            {
-                                dataCount++;
-                            }
-                            tempDataList[dataCount].paragraphs.Add(tempParagraphs);
-                            currentTitle = sheet2ValueArray[r, 7] == null ? null : sheet2ValueArray[r, 7].ToString();
-                        }
-                        else if (sheet2ValueArray[r, 7] == currentTitle)
-                        {
-                            tempDataList[dataCount].paragraphs.Add(tempParagraphs);
-                        }
-                        else
-                        {
-                            dataCount++;
-                            tempDataList[dataCount].paragraphs.Add(tempParagraphs);
-                            currentTitle = sheet2ValueArray[r, 7].ToString();
-                        }
-                    }
-                    topName.data = tempDataList.Cast<object>().ToList();
-
-                    // * TopName->Data->Paragraphs 객체 리스트 내의 Qas 객체 리스트 입력
-                    dataCount = 0;
-                    int paragraphCount = 0;
-                    int currentParagraph = 1;
-                    tempDataList = topName.data.Cast<Data>().ToList();
-                    List<Qas> tempQasList = new List<Qas>();
-                    for (int r = 2; r <= sheet1ValueArray.GetLength(0); r++)
-                    {
-                        Qas tempQas = new Qas();
-                        tempQas.id = sheet1ValueArray[r, 2] == null ? null : sheet1ValueArray[r, 2].ToString();
-                        tempQas.confuseQt = Convert.ToBoolean(sheet1ValueArray[r, 3] == null ? null : sheet1ValueArray[r, 3]);
-                        tempQas.confuseQf = Convert.ToBoolean(sheet1ValueArray[r, 4] == null ? null : sheet1ValueArray[r, 4]);
-                        tempQas.confuseLat = Convert.ToBoolean(sheet1ValueArray[r, 5] == null ? null : sheet1ValueArray[r, 5]);
-                        tempQas.confuseSat = Convert.ToBoolean(sheet1ValueArray[r, 6] == null ? null : sheet1ValueArray[r, 6]);
-                        
-                        tempQas.question = sheet1ValueArray[r, 7] == null ? null : sheet1ValueArray[r, 7].ToString();
-                       // tempQas.question_original = sheet1ValueArray[r, 5] == null ? null : sheet1ValueArray[r, 5].ToString();
-                        tempQas.question_en = sheet1ValueArray[r, 8] == null ? null : sheet1ValueArray[r, 8].ToString();
-                        tempQas.question_tagged = sheet1ValueArray[r, 9] == null ? null : sheet1ValueArray[r, 9].ToString();
-                        
-                        //if (sheet1ValueArray[r, 7] == null)
-                        //{
-                        //    tempQas.question_tagged = null;
-                        //}
-                        //else
-                        //{
-                        //    tempQas.question_tagged = new List<string>();
-                        //    string[] tempTagged = sheet1ValueArray[r, 7].ToString().Split(':');
-                        //    foreach (var item in tempTagged)
-                        //    {
-                        //        tempQas.question_tagged.Add(item);
-                        //    }
-                        //}
-                        tempQas.questionType = sheet1ValueArray[r, 10] == null ? null : sheet1ValueArray[r, 10].ToString();
-                        tempQas.questionFocus = sheet1ValueArray[r, 11] == null ? null : sheet1ValueArray[r, 11].ToString();
-                        tempQas.questionSAT = sheet1ValueArray[r, 12] == null ? null : sheet1ValueArray[r, 12].ToString();
-                        tempQas.questionLAT = sheet1ValueArray[r, 13] == null ? null : sheet1ValueArray[r, 13].ToString();
-
-                        tempQas.etriQtCheck = Convert.ToBoolean(sheet1ValueArray[r, 14] == null ? null : sheet1ValueArray[r, 14]);
-                        tempQas.etriQfCheck = Convert.ToBoolean(sheet1ValueArray[r, 15] == null ? null : sheet1ValueArray[r, 15]);
-                        tempQas.etriLatCheck = Convert.ToBoolean(sheet1ValueArray[r, 16] == null ? null : sheet1ValueArray[r, 16]);
-                        tempQas.etriSatCheck = Convert.ToBoolean(sheet1ValueArray[r, 17] == null ? null : sheet1ValueArray[r, 17]);
-
-                        tempQas.etriQt = sheet1ValueArray[r, 18] == null ? null : sheet1ValueArray[r, 18].ToString();//
-                        tempQas.etriQf = sheet1ValueArray[r, 19] == null ? null : sheet1ValueArray[r, 19].ToString();//
-                        tempQas.etriLat = sheet1ValueArray[r, 20] == null ? null : sheet1ValueArray[r, 20].ToString();//
-                        tempQas.etriSat = sheet1ValueArray[r, 21] == null ? null : sheet1ValueArray[r, 21].ToString();//
-                        List<Answers> tempAnswersList = new List<Answers>();
-
-                        // * TopName->Data->Paragraphs->Qas 객체 리스트 내의 Answers 객체 리스트 입력
-                        for (int i = 0; i < 3; i++)
-                        {
-                            int ansStartColNum = 22 + (i * 6);//18
-                            if (sheet1ValueArray[r, ansStartColNum] == null)
-                            {
-                                break;      // 정답의 text 공백이면 없음 처리
-                            }
-
-                            Answers tempAnswers = new Answers();
-                            tempAnswers.text = sheet1ValueArray[r, ansStartColNum] == null ? null : sheet1ValueArray[r, ansStartColNum].ToString();
-                            //tempAnswers.text_original = sheet1ValueArray[r, ansStartColNum + 1] == null ? null : sheet1ValueArray[r, ansStartColNum + 1].ToString();
-                            tempAnswers.text_en = sheet1ValueArray[r, ansStartColNum + 1] == null ? null : sheet1ValueArray[r, ansStartColNum + 1].ToString();
-                            tempAnswers.text_tagged = sheet1ValueArray[r, ansStartColNum + 2] == null ? null : sheet1ValueArray[r, ansStartColNum + 2].ToString();
-                            tempAnswers.text_syn = sheet1ValueArray[r, ansStartColNum + 3] == null ? null : sheet1ValueArray[r, ansStartColNum + 3].ToString();
-                            //if (sheet1ValueArray[r, ansStartColNum + 3] == null)
+                            object tempTitle = sheet2ValueArray[r, 7];
+                            //if (!titleList.Any())   // 리스트에 아무것도 없을때 (=맨처음)
                             //{
-                            //    tempAnswers.text_tagged = null;
+                            //    titleList.Add(tempTitle);
+                            //}
+                            if (tempTitle == null)  // null 이거나 "" 일 때 tempTitle == ""
+                            {
+                                titleList.Add(tempTitle);
+                            }
+                            else
+                            {
+                                titleList.Add(tempTitle);
+                            }
+                            //else if (titleList.Contains(tempTitle)) // 타이틀 이미 입력됨(통과)
+                            //{
+                            //    continue;
+                            //}
+
+                            Data tempData = new Data();
+                            tempData.title = tempTitle == null ? "" : tempTitle.ToString();
+                            tempData.paragraphs = new List<object>();
+
+                            topName.data.Add(tempData);
+                        }
+
+                        // * TopName->Data 객체 리스트 내의 Paragraphs 객체 리스트 입력
+                        //int dataCount = 0;
+                        currentTitle = sheet2ValueArray[2, 7];
+                        List<Data> tempDataList = topName.data.Cast<Data>().ToList();
+                        for (int r = 2; r <= sheet2ValueArray.GetLength(0); r++)
+                        {
+                            Paragraphs tempParagraphs = new Paragraphs();
+                            tempParagraphs.context = sheet2ValueArray[r, 8] == null ? null : sheet2ValueArray[r, 8].ToString();
+                            //tempParagraphs.context_original = sheet2ValueArray[r, 9] == null ? null : sheet2ValueArray[r, 9].ToString();
+                            tempParagraphs.context_en = sheet2ValueArray[r, 9] == null ? null : sheet2ValueArray[r, 9].ToString();
+                            tempParagraphs.context_tagged = sheet2ValueArray[r, 10] == null ? null : sheet2ValueArray[r, 10].ToString();
+                            //if (sheet2ValueArray[r, 11] == null)
+                            //{
+                            //    tempParagraphs.context_tagged = null;
                             //}
                             //else
                             //{
-                            //    tempAnswers.text_tagged = new List<string>();
-                            //    string[] tempTagged = sheet1ValueArray[r, ansStartColNum + 3].ToString().Split(':');
+                            //    //tempParagraphs.context_tagged = new List<string>();
+                            //    string[] tempTagged = sheet2ValueArray[r, 11].ToString().Split(':');
                             //    foreach (var item in tempTagged)
                             //    {
-                            //        tempAnswers.text_tagged.Add(item);
+                            //        tempParagraphs.context_tagged.Add(item);
                             //    }
                             //}
-                            //if (sheet1ValueArray[r, ansStartColNum + 4] == null)
+                            tempParagraphs.qas = new List<object>();
+
+                            if (sheet2ValueArray[r, 7] == null || sheet2ValueArray[r, 7].ToString() == "")
+                            {
+                                if (r != 2)
+                                {
+                                    dataCount++;
+                                }
+                                tempDataList[dataCount].paragraphs.Add(tempParagraphs);
+                                currentTitle = sheet2ValueArray[r, 7] == null ? null : sheet2ValueArray[r, 7].ToString();
+                            }
+                            else if (sheet2ValueArray[r, 7] == currentTitle)
+                            {
+                                tempDataList[dataCount].paragraphs.Add(tempParagraphs);
+                            }
+                            else
+                            {
+                                dataCount++;
+                                tempDataList[dataCount].paragraphs.Add(tempParagraphs);
+                                currentTitle = sheet2ValueArray[r, 7].ToString();
+                            }
+                        }
+                        topName.data = tempDataList.Cast<object>().ToList();
+
+                        // * TopName->Data->Paragraphs 객체 리스트 내의 Qas 객체 리스트 입력
+                        dataCount = 0;
+                        //int paragraphCount = 0;
+                        int currentParagraph = 1;
+                        tempDataList = topName.data.Cast<Data>().ToList();
+                        List<Qas> tempQasList = new List<Qas>();
+                        for (int r = 2; r <= sheet1ValueArray.GetLength(0); r++)
+                        {
+                            Qas tempQas = new Qas();
+                            tempQas.id = sheet1ValueArray[r, 2] == null ? null : sheet1ValueArray[r, 2].ToString();
+                            tempQas.confuseQt = Convert.ToBoolean(sheet1ValueArray[r, 3] == null ? null : sheet1ValueArray[r, 3]);
+                            tempQas.confuseQf = Convert.ToBoolean(sheet1ValueArray[r, 4] == null ? null : sheet1ValueArray[r, 4]);
+                            tempQas.confuseLat = Convert.ToBoolean(sheet1ValueArray[r, 5] == null ? null : sheet1ValueArray[r, 5]);
+                            tempQas.confuseSat = Convert.ToBoolean(sheet1ValueArray[r, 6] == null ? null : sheet1ValueArray[r, 6]);
+
+                            tempQas.question = sheet1ValueArray[r, 7] == null ? null : sheet1ValueArray[r, 7].ToString();
+                            // tempQas.question_original = sheet1ValueArray[r, 5] == null ? null : sheet1ValueArray[r, 5].ToString();
+                            tempQas.question_en = sheet1ValueArray[r, 8] == null ? null : sheet1ValueArray[r, 8].ToString();
+                            tempQas.question_tagged = sheet1ValueArray[r, 9] == null ? null : sheet1ValueArray[r, 9].ToString();
+
+                            //if (sheet1ValueArray[r, 7] == null)
                             //{
-                            //    tempAnswers.text_syn = null;
+                            //    tempQas.question_tagged = null;
                             //}
                             //else
                             //{
-                            //    tempAnswers.text_syn = new List<string>();
-                            //    string[] tempSyn = sheet1ValueArray[r, ansStartColNum + 4].ToString().Split(':');
-                            //    foreach (var item in tempSyn)
+                            //    tempQas.question_tagged = new List<string>();
+                            //    string[] tempTagged = sheet1ValueArray[r, 7].ToString().Split(':');
+                            //    foreach (var item in tempTagged)
                             //    {
-                            //        tempAnswers.text_syn.Add(item);
+                            //        tempQas.question_tagged.Add(item);
                             //    }
                             //}
-                            tempAnswers.answer_start = Convert.ToInt32(sheet1ValueArray[r, ansStartColNum + 4]);
-                            tempAnswers.answer_end = Convert.ToInt32(sheet1ValueArray[r, ansStartColNum + 5]);
+                            tempQas.questionType = sheet1ValueArray[r, 10] == null ? null : sheet1ValueArray[r, 10].ToString();
+                            tempQas.questionFocus = sheet1ValueArray[r, 11] == null ? null : sheet1ValueArray[r, 11].ToString();
+                            tempQas.questionSAT = sheet1ValueArray[r, 12] == null ? null : sheet1ValueArray[r, 12].ToString();
+                            tempQas.questionLAT = sheet1ValueArray[r, 13] == null ? null : sheet1ValueArray[r, 13].ToString();
 
-                            tempAnswersList.Add(tempAnswers);
-                        }
-                        tempQas.answers = tempAnswersList.Cast<object>().ToList();
+                            tempQas.etriQtCheck = Convert.ToBoolean(sheet1ValueArray[r, 14] == null ? null : sheet1ValueArray[r, 14]);
+                            tempQas.etriQfCheck = Convert.ToBoolean(sheet1ValueArray[r, 15] == null ? null : sheet1ValueArray[r, 15]);
+                            tempQas.etriLatCheck = Convert.ToBoolean(sheet1ValueArray[r, 16] == null ? null : sheet1ValueArray[r, 16]);
+                            tempQas.etriSatCheck = Convert.ToBoolean(sheet1ValueArray[r, 17] == null ? null : sheet1ValueArray[r, 17]);
 
-                        tempQasList.Add(tempQas);
-                        currentParagraph = Convert.ToInt32(sheet1ValueArray[r, 40]);//36
+                            tempQas.etriQt = sheet1ValueArray[r, 18] == null ? null : sheet1ValueArray[r, 18].ToString();//
+                            tempQas.etriQf = sheet1ValueArray[r, 19] == null ? null : sheet1ValueArray[r, 19].ToString();//
+                            tempQas.etriLat = sheet1ValueArray[r, 20] == null ? null : sheet1ValueArray[r, 20].ToString();//
+                            tempQas.etriSat = sheet1ValueArray[r, 21] == null ? null : sheet1ValueArray[r, 21].ToString();//
+                            ///////////////////////////////////////////////////////////////////
+                            tempQas.time = Convert.ToDouble(sheet1ValueArray[r, 41] == null ? null : sheet1ValueArray[r, 41]);
+                            tempQas.checkIndividual = Convert.ToBoolean(sheet1ValueArray[r, 42] == null ? null : sheet1ValueArray[r, 42]);
 
-                        if (r + 1 <= sheet1ValueArray.GetLength(0)) // 다음 목표 row가 sheet1ValueArray의 1차 배열 길이를 넘지 않을때
-                        {
-                            if (currentParagraph != Convert.ToInt32(sheet1ValueArray[r + 1, 40]))   // 현재 row의 소속 paragraph 값과 다음 row의 소속 paragraph값을 비교하여 같지 않다면
+                            List<Answers> tempAnswersList = new List<Answers>();
+
+                            // * TopName->Data->Paragraphs->Qas 객체 리스트 내의 Answers 객체 리스트 입력
+                            for (int i = 0; i < 3; i++)
                             {
-                                topName.data.Cast<Data>().ToList()[dataCount].paragraphs.Cast<Paragraphs>().ToList()[paragraphCount].qas = tempQasList.Cast<object>().ToList(); // Qas 리스트 삽입
-                                tempQasList = new List<Qas>();
-                                if (paragraphCount < topName.data.Cast<Data>().ToList()[dataCount].paragraphs.Count - 1) // paragraphCount 값이 현재 Data에서의 끝에 도달하기 전에는 이렇게 처리
+                                int ansStartColNum = 22 + (i * 6);//18
+                                if (sheet1ValueArray[r, ansStartColNum] == null)
                                 {
-                                    paragraphCount++;
+                                    break;      // 정답의 text 공백이면 없음 처리
                                 }
-                                else    // 도달하고 난 후에는 이렇게 처리
+
+                                Answers tempAnswers = new Answers();
+                                tempAnswers.text = sheet1ValueArray[r, ansStartColNum] == null ? null : sheet1ValueArray[r, ansStartColNum].ToString();
+                                //tempAnswers.text_original = sheet1ValueArray[r, ansStartColNum + 1] == null ? null : sheet1ValueArray[r, ansStartColNum + 1].ToString();
+                                tempAnswers.text_en = sheet1ValueArray[r, ansStartColNum + 1] == null ? null : sheet1ValueArray[r, ansStartColNum + 1].ToString();
+                                tempAnswers.text_tagged = sheet1ValueArray[r, ansStartColNum + 2] == null ? null : sheet1ValueArray[r, ansStartColNum + 2].ToString();
+                                tempAnswers.text_syn = sheet1ValueArray[r, ansStartColNum + 3] == null ? null : sheet1ValueArray[r, ansStartColNum + 3].ToString();
+                                //if (sheet1ValueArray[r, ansStartColNum + 3] == null)
+                                //{
+                                //    tempAnswers.text_tagged = null;
+                                //}
+                                //else
+                                //{
+                                //    tempAnswers.text_tagged = new List<string>();
+                                //    string[] tempTagged = sheet1ValueArray[r, ansStartColNum + 3].ToString().Split(':');
+                                //    foreach (var item in tempTagged)
+                                //    {
+                                //        tempAnswers.text_tagged.Add(item);
+                                //    }
+                                //}
+                                //if (sheet1ValueArray[r, ansStartColNum + 4] == null)
+                                //{
+                                //    tempAnswers.text_syn = null;
+                                //}
+                                //else
+                                //{
+                                //    tempAnswers.text_syn = new List<string>();
+                                //    string[] tempSyn = sheet1ValueArray[r, ansStartColNum + 4].ToString().Split(':');
+                                //    foreach (var item in tempSyn)
+                                //    {
+                                //        tempAnswers.text_syn.Add(item);
+                                //    }
+                                //}
+                                tempAnswers.answer_start = Convert.ToInt32(sheet1ValueArray[r, ansStartColNum + 4]);
+                                tempAnswers.answer_end = Convert.ToInt32(sheet1ValueArray[r, ansStartColNum + 5]);
+
+                                tempAnswersList.Add(tempAnswers);
+                            }
+                            tempQas.answers = tempAnswersList.Cast<object>().ToList();
+
+                            tempQasList.Add(tempQas);
+                            currentParagraph = Convert.ToInt32(sheet1ValueArray[r, 40]);//36
+
+                            if (r + 1 <= sheet1ValueArray.GetLength(0)) // 다음 목표 row가 sheet1ValueArray의 1차 배열 길이를 넘지 않을때
+                            {
+                                if (currentParagraph != Convert.ToInt32(sheet1ValueArray[r + 1, 40]))   // 현재 row의 소속 paragraph 값과 다음 row의 소속 paragraph값을 비교하여 같지 않다면
                                 {
-                                    dataCount++;
-                                    paragraphCount = 0;
+                                    topName.data.Cast<Data>().ToList()[dataCount].paragraphs.Cast<Paragraphs>().ToList()[paragraphCount].qas = tempQasList.Cast<object>().ToList(); // Qas 리스트 삽입
+                                    tempQasList = new List<Qas>();
+                                    if (paragraphCount < topName.data.Cast<Data>().ToList()[dataCount].paragraphs.Count - 1) // paragraphCount 값이 현재 Data에서의 끝에 도달하기 전에는 이렇게 처리
+                                    {
+                                        paragraphCount++;
+                                    }
+                                    else    // 도달하고 난 후에는 이렇게 처리
+                                    {
+                                        dataCount++;
+                                        paragraphCount = 0;
+                                    }
                                 }
                             }
-                        }
 
-                        if (r == sheet1ValueArray.GetLength(0))  // 현재 row가 마지막일때
-                        {
-                            topName.data.Cast<Data>().ToList()[dataCount].paragraphs.Cast<Paragraphs>().ToList()[paragraphCount].qas = tempQasList.Cast<object>().ToList();
+                            if (r == sheet1ValueArray.GetLength(0))  // 현재 row가 마지막일때
+                            {
+                                topName.data.Cast<Data>().ToList()[dataCount].paragraphs.Cast<Paragraphs>().ToList()[paragraphCount].qas = tempQasList.Cast<object>().ToList();
+                            }
+
                         }
-                        
+                    }
+                    catch(Exception e)
+                    {
+                        MessageBox.Show(dataCount.ToString() + "haha" + paragraphCount.ToString() + "hoho" + currentTitle.ToString());
                     }
 
                     // ** JSON 파일로 저장
@@ -870,6 +903,293 @@ namespace JSON_ExcelDirectionalConverter
                     {
                         sw.Write(saveJSONText);
                     }
+
+                    #endregion
+                }
+                else
+                {
+                    #region 서경대Excel -> JSON 변환
+
+                    // ** Excel 파일 불러와서 object 이중배열에 데이터 입력
+                    excelOpen = true;
+                    objWorkbook = objWorkbooks.Open(m_path);
+                    objWorksheets = objWorkbook.Worksheets;
+
+                    objWorksheet = (Excel.Worksheet)objWorksheets[1];
+                    range = objWorksheet.UsedRange;
+                    sheet1ValueArray = (object[,])range.get_Value(missing);
+                    Marshal.ReleaseComObject(range);
+                    Marshal.ReleaseComObject(objWorksheet);
+
+                    //objWorksheet = (Excel.Worksheet)objWorksheets[2];
+                    //range = objWorksheet.UsedRange;
+                    //sheet2ValueArray = (object[,])range.get_Value(missing);
+                    //Marshal.FinalReleaseComObject(range);
+                    //Marshal.FinalReleaseComObject(objWorksheet);
+
+                    Marshal.FinalReleaseComObject(objWorksheets);
+
+                    objWorkbook.Close(false, missing, missing);
+                    objWorkbooks.Close();
+                    objApp.Quit();
+
+                    Marshal.FinalReleaseComObject(objWorkbook);
+                    Marshal.FinalReleaseComObject(objWorkbooks);
+                    Marshal.FinalReleaseComObject(objApp);
+
+                    objApp = null;
+                    excelOpen = false;
+
+                    // ** sheet1, sheet2 object 이중배열의 데이터를 JSON 태그 클래스의 객체에 입력
+                    // * TopName 객체 데이터 입력
+                    topName = new TopName();
+                    topName.version = "서경대_2018";
+                    topName.creator = "서경대";
+                    topName.progress = 0;
+                    topName.formatt = "Work";
+                    //topName.time = Convert.ToDouble(sheet2ValueArray[2, 6]);
+                    topName.data = new List<object>();
+
+                    // * TopName 객체 내의 Data 객체 리스트 입력
+                    IList<object> titleList = new List<object>();
+                    for (int r = 2; r <= sheet1ValueArray.GetLength(0); r++)
+                    {
+                        object tempTitle = sheet1ValueArray[r, 5];
+                        if (!titleList.Any())   // 리스트에 아무것도 없을때 (=맨처음)
+                        {
+                            titleList.Add(tempTitle);
+                        }
+                        else if (tempTitle == null)  // null 이거나 "" 일 때 tempTitle == ""
+                        {
+                            titleList.Add(tempTitle);
+                        }
+                        else if (titleList.Contains(tempTitle)) // 타이틀 이미 입력됨(통과)
+                        {
+                            continue;
+                        }
+
+                        Data tempData = new Data();
+                        tempData.title = tempTitle == null ? "" : tempTitle.ToString();
+                        tempData.paragraphs = new List<object>();
+
+                        topName.data.Add(tempData);
+                    }
+
+                    // * TopName->Data 객체 리스트 내의 Paragraphs 객체 리스트 입력
+                    int dataCount = 0;
+                    object currentTitle = sheet1ValueArray[2, 5];
+                    List<Data> tempDataList = topName.data.Cast<Data>().ToList();
+                    for (int r = 2; r <= sheet1ValueArray.GetLength(0); r++)
+                    {
+                        Paragraphs tempParagraphs = new Paragraphs();
+                        tempParagraphs.context = sheet1ValueArray[r, 7] == null ? null : sheet1ValueArray[r, 7].ToString();
+                        //tempParagraphs.context_original = sheet2ValueArray[r, 9] == null ? null : sheet2ValueArray[r, 9].ToString();
+                        //tempParagraphs.context_en = sheet1ValueArray[r, 9] == null ? null : sheet1ValueArray[r, 9].ToString();
+                        //tempParagraphs.context_tagged = sheet1ValueArray[r, 10] == null ? null : sheet1ValueArray[r, 10].ToString();
+                        //if (sheet2ValueArray[r, 11] == null)
+                        //{
+                        //    tempParagraphs.context_tagged = null;
+                        //}
+                        //else
+                        //{
+                        //    //tempParagraphs.context_tagged = new List<string>();
+                        //    string[] tempTagged = sheet2ValueArray[r, 11].ToString().Split(':');
+                        //    foreach (var item in tempTagged)
+                        //    {
+                        //        tempParagraphs.context_tagged.Add(item);
+                        //    }
+                        //}
+                        tempParagraphs.qas = new List<object>();
+
+                        if (sheet1ValueArray[r, 2] == null || sheet1ValueArray[r, 2].ToString() == "")
+                        {
+                            if (r != 2)
+                            {
+                                dataCount++;
+                            }
+                            tempDataList[dataCount].paragraphs.Add(tempParagraphs);
+                            currentTitle = sheet1ValueArray[r, 5] == null ? null : sheet1ValueArray[r, 5].ToString();
+                        }
+                        else if (sheet1ValueArray[r, 5] == currentTitle)
+                        {
+                            tempDataList[dataCount].paragraphs.Add(tempParagraphs);
+                        }
+                        else
+                        {
+                            dataCount++;
+                            tempDataList[dataCount].paragraphs.Add(tempParagraphs);
+                            currentTitle = sheet1ValueArray[r, 5].ToString();
+                        }
+                    }
+                    topName.data = tempDataList.Cast<object>().ToList();
+
+                    // * TopName->Data->Paragraphs 객체 리스트 내의 Qas 객체 리스트 입력
+                    dataCount = 0;
+                    int paragraphCount = 0;
+                    int currentParagraph = 1;
+                    tempDataList = topName.data.Cast<Data>().ToList();
+                    List<Qas> tempQasList = new List<Qas>();
+                    for (int r = 2; r <= sheet1ValueArray.GetLength(0); r++)
+                    {
+                        Qas tempQas = new Qas();
+                        //tempQas.id = sheet1ValueArray[r, 2] == null ? null : sheet1ValueArray[r, 2].ToString();
+                        //tempQas.confuseQt = Convert.ToBoolean(sheet1ValueArray[r, 3] == null ? null : sheet1ValueArray[r, 3]);
+                        //tempQas.confuseQf = Convert.ToBoolean(sheet1ValueArray[r, 4] == null ? null : sheet1ValueArray[r, 4]);
+                        //tempQas.confuseLat = Convert.ToBoolean(sheet1ValueArray[r, 5] == null ? null : sheet1ValueArray[r, 5]);
+                        //tempQas.confuseSat = Convert.ToBoolean(sheet1ValueArray[r, 6] == null ? null : sheet1ValueArray[r, 6]);
+
+                        tempQas.question = sheet1ValueArray[r, 2] == null ? null : sheet1ValueArray[r, 2].ToString();
+                        // tempQas.question_original = sheet1ValueArray[r, 5] == null ? null : sheet1ValueArray[r, 5].ToString();
+                        //tempQas.question_en = sheet1ValueArray[r, 8] == null ? null : sheet1ValueArray[r, 8].ToString();
+                        //tempQas.question_tagged = sheet1ValueArray[r, 9] == null ? null : sheet1ValueArray[r, 9].ToString();
+
+                        //if (sheet1ValueArray[r, 7] == null)
+                        //{
+                        //    tempQas.question_tagged = null;
+                        //}
+                        //else
+                        //{
+                        //    tempQas.question_tagged = new List<string>();
+                        //    string[] tempTagged = sheet1ValueArray[r, 7].ToString().Split(':');
+                        //    foreach (var item in tempTagged)
+                        //    {
+                        //        tempQas.question_tagged.Add(item);
+                        //    }
+                        //}
+                        //tempQas.questionType = sheet1ValueArray[r, 10] == null ? null : sheet1ValueArray[r, 10].ToString();
+                        //tempQas.questionFocus = sheet1ValueArray[r, 11] == null ? null : sheet1ValueArray[r, 11].ToString();
+                        //tempQas.questionSAT = sheet1ValueArray[r, 12] == null ? null : sheet1ValueArray[r, 12].ToString();
+                        //tempQas.questionLAT = sheet1ValueArray[r, 13] == null ? null : sheet1ValueArray[r, 13].ToString();
+
+                        //tempQas.etriQtCheck = Convert.ToBoolean(sheet1ValueArray[r, 14] == null ? null : sheet1ValueArray[r, 14]);
+                        //tempQas.etriQfCheck = Convert.ToBoolean(sheet1ValueArray[r, 15] == null ? null : sheet1ValueArray[r, 15]);
+                        //tempQas.etriLatCheck = Convert.ToBoolean(sheet1ValueArray[r, 16] == null ? null : sheet1ValueArray[r, 16]);
+                        //tempQas.etriSatCheck = Convert.ToBoolean(sheet1ValueArray[r, 17] == null ? null : sheet1ValueArray[r, 17]);
+
+                        //tempQas.etriQt = sheet1ValueArray[r, 18] == null ? null : sheet1ValueArray[r, 18].ToString();//
+                        //tempQas.etriQf = sheet1ValueArray[r, 19] == null ? null : sheet1ValueArray[r, 19].ToString();//
+                        //tempQas.etriLat = sheet1ValueArray[r, 20] == null ? null : sheet1ValueArray[r, 20].ToString();//
+                        //tempQas.etriSat = sheet1ValueArray[r, 21] == null ? null : sheet1ValueArray[r, 21].ToString();//
+                        ///////////////////////////////////////////////////////////////////
+                        //tempQas.time = Convert.ToDouble(sheet1ValueArray[r, 41] == null ? null : sheet1ValueArray[r, 41]);
+                        //tempQas.checkIndividual = Convert.ToBoolean(sheet1ValueArray[r, 42] == null ? null : sheet1ValueArray[r, 42]);
+
+                        List<Answers> tempAnswersList = new List<Answers>();
+
+                        // * TopName->Data->Paragraphs->Qas 객체 리스트 내의 Answers 객체 리스트 입력
+                        //for (int i = 0; i < 3; i++)
+                        //{
+                            //int ansStartColNum = 22 + (i * 6);//18
+                            //if (sheet1ValueArray[r, ansStartColNum] == null)
+                            //{
+                            //    break;      // 정답의 text 공백이면 없음 처리
+                            //}
+
+                            Answers tempAnswers = new Answers();
+                            tempAnswers.text = sheet1ValueArray[r, 3] == null ? null : sheet1ValueArray[r, 3].ToString();
+                            //tempAnswers.text_original = sheet1ValueArray[r, ansStartColNum + 1] == null ? null : sheet1ValueArray[r, ansStartColNum + 1].ToString();
+                            //tempAnswers.text_en = sheet1ValueArray[r, ansStartColNum + 1] == null ? null : sheet1ValueArray[r, ansStartColNum + 1].ToString();
+                            //tempAnswers.text_tagged = sheet1ValueArray[r, ansStartColNum + 2] == null ? null : sheet1ValueArray[r, ansStartColNum + 2].ToString();
+                            //tempAnswers.text_syn = sheet1ValueArray[r, ansStartColNum + 3] == null ? null : sheet1ValueArray[r, ansStartColNum + 3].ToString();
+                            //if (sheet1ValueArray[r, ansStartColNum + 3] == null)
+                            //{
+                            //    tempAnswers.text_tagged = null;
+                            //}
+                            //else
+                            //{
+                            //    tempAnswers.text_tagged = new List<string>();
+                            //    string[] tempTagged = sheet1ValueArray[r, ansStartColNum + 3].ToString().Split(':');
+                            //    foreach (var item in tempTagged)
+                            //    {
+                            //        tempAnswers.text_tagged.Add(item);
+                            //    }
+                            //}
+                            //if (sheet1ValueArray[r, ansStartColNum + 4] == null)
+                            //{
+                            //    tempAnswers.text_syn = null;
+                            //}
+                            //else
+                            //{
+                            //    tempAnswers.text_syn = new List<string>();
+                            //    string[] tempSyn = sheet1ValueArray[r, ansStartColNum + 4].ToString().Split(':');
+                            //    foreach (var item in tempSyn)
+                            //    {
+                            //        tempAnswers.text_syn.Add(item);
+                            //    }
+                            //}
+                            //tempAnswers.answer_start = Convert.ToInt32(sheet1ValueArray[r, ansStartColNum + 4]);
+                            //tempAnswers.answer_end = Convert.ToInt32(sheet1ValueArray[r, ansStartColNum + 5]);
+
+                            tempAnswers.answer_start = -1;
+                            tempAnswers.answer_end = -1;
+
+                            tempAnswersList.Add(tempAnswers);
+                        //}
+                        tempQas.answers = tempAnswersList.Cast<object>().ToList();
+
+                        tempQasList.Add(tempQas);
+                        //currentParagraph = Convert.ToInt32(sheet1ValueArray[r, 40]);//36
+
+                        if (r + 1 <= sheet1ValueArray.GetLength(0)) // 다음 목표 row가 sheet1ValueArray의 1차 배열 길이를 넘지 않을때
+                        {
+                            if (currentParagraph != Convert.ToInt32(sheet1ValueArray[r + 1, 40]))   // 현재 row의 소속 paragraph 값과 다음 row의 소속 paragraph값을 비교하여 같지 않다면
+                            {
+                                topName.data.Cast<Data>().ToList()[dataCount].paragraphs.Cast<Paragraphs>().ToList()[paragraphCount].qas = tempQasList.Cast<object>().ToList(); // Qas 리스트 삽입
+                                tempQasList = new List<Qas>();
+                                if (paragraphCount < topName.data.Cast<Data>().ToList()[dataCount].paragraphs.Count - 1) // paragraphCount 값이 현재 Data에서의 끝에 도달하기 전에는 이렇게 처리
+                                {
+                                    paragraphCount++;
+                                }
+                                else    // 도달하고 난 후에는 이렇게 처리
+                                {
+                                    dataCount++;
+                                    paragraphCount = 0;
+                                }
+                            }
+                        }
+
+                        if (r == sheet1ValueArray.GetLength(0))  // 현재 row가 마지막일때
+                        {
+                            topName.data.Cast<Data>().ToList()[dataCount].paragraphs.Cast<Paragraphs>().ToList()[paragraphCount].qas = tempQasList.Cast<object>().ToList();
+                        }
+
+                    }
+
+                    // ** JSON 파일로 저장
+                    m_savePath = Path.ChangeExtension(m_path, "json");
+                    FileInfo fi = new FileInfo(m_savePath);
+                    if (fi.Exists)  // 파일이 이미 존재하면 삭제
+                    {
+                        fi.Delete();
+                    }
+
+                    string saveJSONText;
+                    if (m_EtoJNullRemoveCheck)
+                    {
+
+                        saveJSONText = JsonConvert.SerializeObject(topName, Formatting.Indented, new JsonSerializerSettings
+                        {
+                            NullValueHandling = NullValueHandling.Ignore    // Null값 객체 제거
+                        }
+                            );
+                    }
+                    else
+                    {
+                        saveJSONText = JsonConvert.SerializeObject(topName, Formatting.Indented, new JsonSerializerSettings
+                        {
+                            NullValueHandling = NullValueHandling.Include   // Null값 객체 포함
+                        }
+                            );
+                    }
+
+                    using (StreamWriter sw = new StreamWriter(m_savePath))
+                    {
+                        sw.Write(saveJSONText);
+                    }
+
+
+
+
 
                     #endregion
                 }
