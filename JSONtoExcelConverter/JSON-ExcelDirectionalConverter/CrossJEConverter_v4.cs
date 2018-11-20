@@ -16,17 +16,20 @@ using System.Collections;
 
 namespace JSON_ExcelDirectionalConverter
 {
-    class CrossJEConverter_v2
+    class CrossJEConverter_v4
     {
         const string STR_CONVERTING_SUCCESS = "SUCCESS";
 
         private convertingMode m_currentConvertingMode;
+        private IList<string> m_filePaths;
         private string m_path;
         private string m_savePath;
         private string m_saveFileName;
         private int m_fileCount;
+        private int m_paragraphCount;
 
-        private static string[] sheet1ColHeader = {"count", "id", "confuseQt1", "confuseQf1", "confuseSat1", "confuseLat1", "question", "question_en", "question_tagged1", "questionType1",
+        private static string[] sheet1ColHeader = {"count", "version", "creator", "progress", "formatt", "time", "check", "firstfile", "secondfile",
+                                                   "title", "context", "context_en", "context_tagged","id", "confuseQt1", "confuseQf1", "confuseSat1", "confuseLat1", "question", "question_en", "question_tagged1", "questionType1",
                                                   "questionFocus1", "questionSAT1", "questionLAT1", "confuseQt2", "confuseQf2", "confuseSat2", "confuseLat2", "question_tagged2",
                                                   "questionType2", "questionFocus2", "questionSAT2", "questionLAT2", "confuseQt3", "confuseQf3", "confuseSat3", "confuseLat3", "question_tagged3",
                                                   "questionType3", "questionFocus3", "questionSAT3", "questionLAT3", "text", "text_en", "text_tagged", "text_syn", "answer_start",
@@ -35,12 +38,6 @@ namespace JSON_ExcelDirectionalConverter
         private int sheet1ColCount = sheet1ColHeader.Length;
         private int sheet1RowCount;
 
-        private static string[] sheet2ColHeader = {"count", "version", "creator", "progress", "formatt", "time", "check", "firstfile", "secondfile",
-                                                   "title",
-                                                  "context", "context_en", "context_tagged"};
-
-        private int sheet2ColCount = sheet2ColHeader.Length;
-        private int sheet2RowCount;
 
         private Excel.Application objApp;
         private Excel.Workbooks objWorkbooks;
@@ -51,18 +48,17 @@ namespace JSON_ExcelDirectionalConverter
 
         private Excel.XlHAlign HCENTER = Excel.XlHAlign.xlHAlignCenter;
 
-        public CrossJEConverter_v2(convertingMode mode, string saveFileName)//, bool EtoJNullRemoveCheck)
+        public CrossJEConverter_v4(convertingMode mode, string saveFileName)
         {
             m_currentConvertingMode = mode;
             m_saveFileName = saveFileName;
             sheet1RowCount = 0;
-            sheet2RowCount = 0;
-            //m_EtoJNullRemoveCheck = EtoJNullRemoveCheck;
         }
 
         public string convertFiles(IList<string> filePaths)
         {
-            m_fileCount = filePaths.Count;
+            m_filePaths = filePaths;
+            m_fileCount = m_filePaths.Count;
 
             int fileIndex = 0;
             ArrayList sheet1ValueList = new ArrayList();
@@ -78,18 +74,21 @@ namespace JSON_ExcelDirectionalConverter
             ETRI_TopTag EtopTag;
 
             object[,] sheet1ValueArray;
-            object[,] sheet2ValueArray;
 
             int totalCountQas = 0;
             int totalCountParagraphs = 0;
             int sheet1TotalRowCount = 0;
-            int sheet2TotalRowCount = 0;
 
+            ArrayList splitedFileName = new ArrayList();
 
-            foreach (var item in filePaths)
+            foreach (var item in m_filePaths)
             {
+                string[] temp;
                 m_path = item;
                 var missing = Type.Missing;
+
+                temp = m_path.Split('_');
+                splitedFileName.Add(temp);
 
                 objApp = new Excel.Application();
                 objWorkbooks = objApp.Workbooks;
@@ -167,25 +166,24 @@ namespace JSON_ExcelDirectionalConverter
 
                         // ** sheet1ValueArray & sheet2ValueArray 영역 크기 지정
                         sheet1RowCount = countQas;
-                        sheet2RowCount = countParagraphs;
+                        //sheet2RowCount = countParagraphs;
 
                         sheet1ValueArray = new object[sheet1RowCount, sheet1ColCount];
-                        sheet2ValueArray = new object[sheet2RowCount, sheet2ColCount];
+                        //sheet2ValueArray = new object[sheet2RowCount, sheet2ColCount];
 
                         // ** sheet1ValueArray & sheet2ValueArray에 데이터 입력
                         // * paragraph 순번 & name1 영역
-                        for (int row = 0; row < sheet2RowCount; row++)
+                        for (int row = 0; row < sheet1RowCount; row++)
                         {
-                            sheet2ValueArray[row, 0] = sheet2TotalRowCount + 1;
-                            sheet2ValueArray[row, 1] = topTag.version;
-                            sheet2ValueArray[row, 2] = topTag.creator;
-                            sheet2ValueArray[row, 3] = topTag.progress;
-                            sheet2ValueArray[row, 4] = topTag.formatt;
-                            sheet2ValueArray[row, 5] = topTag.time;
-                            sheet2ValueArray[row, 6] = topTag.check;
-                            sheet2ValueArray[row, 7] = topTag.firstfile;
-                            sheet2ValueArray[row, 8] = topTag.secondfile;
-                            sheet2TotalRowCount++;
+                            sheet1ValueArray[row, 0] = row + 1;
+                            sheet1ValueArray[row, 1] = topTag.version;
+                            sheet1ValueArray[row, 2] = topTag.creator;
+                            sheet1ValueArray[row, 3] = topTag.progress;
+                            sheet1ValueArray[row, 4] = topTag.formatt;
+                            sheet1ValueArray[row, 5] = topTag.time;
+                            sheet1ValueArray[row, 6] = topTag.check;
+                            sheet1ValueArray[row, 7] = topTag.firstfile;
+                            sheet1ValueArray[row, 8] = topTag.secondfile;
                         }
 
                         // * name2 & name3 영역
@@ -194,10 +192,10 @@ namespace JSON_ExcelDirectionalConverter
                         {
                             for (int p = 0; p < paragraphs[d].Length; p++)
                             {
-                                sheet2ValueArray[currentRow, 9] = data[d].title;
-                                sheet2ValueArray[currentRow, 10] = paragraphs[d][p].context;
-                                sheet2ValueArray[currentRow, 11] = paragraphs[d][p].context_en;
-                                sheet2ValueArray[currentRow, 12] = paragraphs[d][p].context_tagged;
+                                sheet1ValueArray[currentRow, 9] = data[d].title;
+                                sheet1ValueArray[currentRow, 10] = paragraphs[d][p].context;
+                                sheet1ValueArray[currentRow, 11] = paragraphs[d][p].context_en;
+                                sheet1ValueArray[currentRow, 12] = paragraphs[d][p].context_tagged;
 
                                 currentRow++;
                             }
@@ -212,40 +210,39 @@ namespace JSON_ExcelDirectionalConverter
                             {
                                 for (int q = 0; q < qas[d][p].Length; q++)
                                 {
-                                    sheet1ValueArray[currentRow, 0] = sheet1TotalRowCount + 1;
-                                    sheet1ValueArray[currentRow, 1] = qas[d][p][q].id;
-                                    sheet1ValueArray[currentRow, 2] = qas[d][p][q].confuseQt1;
-                                    sheet1ValueArray[currentRow, 3] = qas[d][p][q].confuseQf1;
-                                    sheet1ValueArray[currentRow, 4] = qas[d][p][q].confuseSat1;
-                                    sheet1ValueArray[currentRow, 5] = qas[d][p][q].confuseLat1;
-                                    sheet1ValueArray[currentRow, 6] = qas[d][p][q].question;
-                                    sheet1ValueArray[currentRow, 7] = qas[d][p][q].question_en;
-                                    sheet1ValueArray[currentRow, 8] = qas[d][p][q].question_tagged1;
-                                    sheet1ValueArray[currentRow, 9] = qas[d][p][q].questionType1;
-                                    sheet1ValueArray[currentRow, 10] = qas[d][p][q].questionFocus1;
-                                    sheet1ValueArray[currentRow, 11] = qas[d][p][q].questionSAT1;
-                                    sheet1ValueArray[currentRow, 12] = qas[d][p][q].questionLAT1;
-                                    sheet1ValueArray[currentRow, 13] = qas[d][p][q].confuseQt2;
-                                    sheet1ValueArray[currentRow, 14] = qas[d][p][q].confuseQf2;
-                                    sheet1ValueArray[currentRow, 15] = qas[d][p][q].confuseSat2;
-                                    sheet1ValueArray[currentRow, 16] = qas[d][p][q].confuseLat2;
-                                    sheet1ValueArray[currentRow, 17] = qas[d][p][q].question_tagged2;//
-                                    sheet1ValueArray[currentRow, 18] = qas[d][p][q].questionType2;//
-                                    sheet1ValueArray[currentRow, 19] = qas[d][p][q].questionFocus2;//
-                                    sheet1ValueArray[currentRow, 20] = qas[d][p][q].questionSAT2;//
-                                    sheet1ValueArray[currentRow, 21] = qas[d][p][q].questionLAT2;
-                                    sheet1ValueArray[currentRow, 22] = qas[d][p][q].confuseQt3;
-                                    sheet1ValueArray[currentRow, 23] = qas[d][p][q].confuseQf3;
-                                    sheet1ValueArray[currentRow, 24] = qas[d][p][q].confuseSat3;
-                                    sheet1ValueArray[currentRow, 25] = qas[d][p][q].confuseLat3;
-                                    sheet1ValueArray[currentRow, 26] = qas[d][p][q].question_tagged3;
-                                    sheet1ValueArray[currentRow, 27] = qas[d][p][q].questionType3;
-                                    sheet1ValueArray[currentRow, 28] = qas[d][p][q].questionFocus3;
-                                    sheet1ValueArray[currentRow, 29] = qas[d][p][q].questionSAT3;
-                                    sheet1ValueArray[currentRow, 30] = qas[d][p][q].questionLAT3;
+                                    sheet1ValueArray[currentRow, 13] = qas[d][p][q].id;
+                                    sheet1ValueArray[currentRow, 14] = qas[d][p][q].confuseQt1;
+                                    sheet1ValueArray[currentRow, 15] = qas[d][p][q].confuseQf1;
+                                    sheet1ValueArray[currentRow, 16] = qas[d][p][q].confuseSat1;
+                                    sheet1ValueArray[currentRow, 17] = qas[d][p][q].confuseLat1;
+                                    sheet1ValueArray[currentRow, 18] = qas[d][p][q].question;
+                                    sheet1ValueArray[currentRow, 19] = qas[d][p][q].question_en;
+                                    sheet1ValueArray[currentRow, 20] = qas[d][p][q].question_tagged1;
+                                    sheet1ValueArray[currentRow, 21] = qas[d][p][q].questionType1;
+                                    sheet1ValueArray[currentRow, 22] = qas[d][p][q].questionFocus1;
+                                    sheet1ValueArray[currentRow, 23] = qas[d][p][q].questionSAT1;
+                                    sheet1ValueArray[currentRow, 24] = qas[d][p][q].questionLAT1;
+                                    sheet1ValueArray[currentRow, 25] = qas[d][p][q].confuseQt2;
+                                    sheet1ValueArray[currentRow, 26] = qas[d][p][q].confuseQf2;
+                                    sheet1ValueArray[currentRow, 27] = qas[d][p][q].confuseSat2;
+                                    sheet1ValueArray[currentRow, 28] = qas[d][p][q].confuseLat2;
+                                    sheet1ValueArray[currentRow, 29] = qas[d][p][q].question_tagged2;//
+                                    sheet1ValueArray[currentRow, 30] = qas[d][p][q].questionType2;//
+                                    sheet1ValueArray[currentRow, 31] = qas[d][p][q].questionFocus2;//
+                                    sheet1ValueArray[currentRow, 32] = qas[d][p][q].questionSAT2;//
+                                    sheet1ValueArray[currentRow, 33] = qas[d][p][q].questionLAT2;
+                                    sheet1ValueArray[currentRow, 34] = qas[d][p][q].confuseQt3;
+                                    sheet1ValueArray[currentRow, 35] = qas[d][p][q].confuseQf3;
+                                    sheet1ValueArray[currentRow, 36] = qas[d][p][q].confuseSat3;
+                                    sheet1ValueArray[currentRow, 37] = qas[d][p][q].confuseLat3;
+                                    sheet1ValueArray[currentRow, 38] = qas[d][p][q].question_tagged3;
+                                    sheet1ValueArray[currentRow, 39] = qas[d][p][q].questionType3;
+                                    sheet1ValueArray[currentRow, 40] = qas[d][p][q].questionFocus3;
+                                    sheet1ValueArray[currentRow, 41] = qas[d][p][q].questionSAT3;
+                                    sheet1ValueArray[currentRow, 42] = qas[d][p][q].questionLAT3;
 
-                                    sheet1ValueArray[currentRow, 37] = currentParaNum;
-                                    currentRow++; sheet1TotalRowCount++;
+                                    sheet1ValueArray[currentRow, 55] = currentParaNum;
+                                    currentRow++;
                                 }
 
                                 currentParaNum++;
@@ -264,8 +261,8 @@ namespace JSON_ExcelDirectionalConverter
                                     {
                                         return "정답의 개수가 3개 초과인 문제가 있습니다.\r\n파일: " + m_path;
                                     }
-
-                                    int answerStartColNum = 31;
+                               
+                                    int answerStartColNum = 43;
                                     for (int a = 0; a < answers[d][p][q].Length; a++)
                                     {
                                         sheet1ValueArray[currentRow, answerStartColNum] = answers[d][p][q][a].text;
@@ -284,18 +281,74 @@ namespace JSON_ExcelDirectionalConverter
                         if ((++fileIndex) < m_fileCount)
                         {
                             sheet1ValueList.Add(sheet1ValueArray);
-                            sheet2ValueList.Add(sheet2ValueArray);
                             continue;
                         }
-                        sheet1ValueList.Add(sheet1ValueArray);
-                        sheet2ValueList.Add(sheet2ValueArray);
 
-                        //여러 sheetValueArray들을 하나로 통합
-                        sheet1RowCount = totalCountQas;
-                        sheet2RowCount = totalCountParagraphs;
+                        //마지막 파일 ADD
+                        sheet1ValueList.Add(sheet1ValueArray);
+
+                        // 여러 sheetValueArray들을 각 작업량의 따라 나눠 하나로 통합
+                        string[] separator = { "(", ")", "-", " " }; //제외할 요소들
+                        int totalRowCount_sheet1 = 0;
+                        int totalRowCount_sheet2 = 0;
+
+                        for (int i = 0; i < fileIndex; i++)
+                        {
+                            string[] _temp = (string[])splitedFileName[i];
+                            string[] splited = _temp[2].Split(separator, StringSplitOptions.RemoveEmptyEntries);
+
+                            //sheet1 작업
+                            int startIndex = Convert.ToInt32(splited[0]);
+                            int endIndex = Convert.ToInt32(splited[1]);
+                            int length = endIndex - startIndex + 1;
+
+                            totalRowCount_sheet1 += length;
+
+                            int rowIndex_sheet1 = 0;
+                            int rowIndex_sheet2 = 0;
+
+                            object[,] temp_arrList = (object[,])sheet1ValueList[i];
+                            object[,] tempSheet1Value = new object[length, sheet1ColCount];
+
+                            for (int j = startIndex - 1; j < endIndex; j++)
+                            {
+                                for (int k = 0; k < sheet1ColCount; k++)
+                                    tempSheet1Value[rowIndex_sheet1, k] = temp_arrList[j, k];
+                                rowIndex_sheet1++;
+                            }
+                            /*
+                            //sheet2 작업
+                            startIndex = (int)tempSheet1Value[0, 37];
+                            endIndex = (int)tempSheet1Value[rowIndex_sheet1 - 1, 37];
+                            length = endIndex - startIndex + 1;
+
+                            totalRowCount_sheet2 += length;
+
+                            temp_arrList = (object[,])sheet2ValueList[i];
+                            object[,] tempSheet2Value = new object[length, sheet2ColCount];
+
+                            for (int j = startIndex - 1; j < endIndex; j++)
+                            {
+                                for (int k = 0; k < sheet2ColCount; k++)
+                                    tempSheet2Value[rowIndex_sheet2, k] = temp_arrList[j, k];
+                                rowIndex_sheet2++;
+                            }
+                            sheet1ValueList.RemoveAt(i);
+                            sheet2ValueList.RemoveAt(i);
+                            sheet1ValueList.Insert(i, tempSheet1Value);
+                            sheet2ValueList.Insert(i, tempSheet2Value);
+                            */
+
+
+                        }
+
+
+
+
+
+                        sheet1RowCount = totalRowCount_sheet1;
 
                         sheet1ValueArray = new object[sheet1RowCount, sheet1ColCount];
-                        sheet2ValueArray = new object[sheet2RowCount, sheet2ColCount];
 
                         int sheet1RowIndex = 0;
                         int sheet2RowIndex = 0;
@@ -313,14 +366,6 @@ namespace JSON_ExcelDirectionalConverter
                                     sheet1ValueArray[sheet1RowIndex, k] = tempSheet1Value[j, k];
                                 sheet1RowIndex++;
                             }
-
-                            _sheet2RowCount = (int)(tempSheet2Value.Length / sheet2ColCount);
-                            for (int j = 0; j < _sheet2RowCount; j++)
-                            {
-                                for (int k = 0; k < sheet2ColCount; k++)
-                                    sheet2ValueArray[sheet2RowIndex, k] = tempSheet2Value[j, k];
-                                sheet2RowIndex++;
-                            }
                         }
 
                         //엑셀파일에 writting
@@ -335,22 +380,19 @@ namespace JSON_ExcelDirectionalConverter
                         range = objWorksheet.get_Range("A1", "M1");
                         range.HorizontalAlignment = HCENTER;
                         range.Interior.Color = Color.FromArgb(142, 169, 219);
-                        range.Value2 = sheet2ColHeader;
+                        
                         Marshal.ReleaseComObject(range);
 
                         Excel.Range c1 = objWorksheet.Cells[2, 1];
-                        Excel.Range c2 = objWorksheet.Cells[sheet2RowCount + 1, sheet2ColCount];
-                        range = objWorksheet.get_Range(c1, c2);
-                        range.Value = sheet2ValueArray;
+                        range = objWorksheet.get_Range(c1);
                         Marshal.FinalReleaseComObject(c1);
-                        Marshal.FinalReleaseComObject(c2);
                         Marshal.FinalReleaseComObject(range);
 
                         Marshal.ReleaseComObject(objWorksheet);
 
                         // * sheet1 부분 적용
                         objWorksheet = (Excel.Worksheet)objWorksheets.Add(missing, missing, missing, missing);
-                        objWorksheet.Name = "Qas";
+                        objWorksheet.Name = "CrossToEtri";
 
                         range = objWorksheet.get_Range("A1", "AL1");
                         range.HorizontalAlignment = HCENTER;
@@ -359,11 +401,9 @@ namespace JSON_ExcelDirectionalConverter
                         Marshal.ReleaseComObject(range);
 
                         c1 = objWorksheet.Cells[2, 1];
-                        c2 = objWorksheet.Cells[sheet1RowCount + 1, sheet1ColCount];
-                        range = objWorksheet.get_Range(c1, c2);
+                        range = objWorksheet.get_Range(c1);
                         range.Value = sheet1ValueArray;
                         Marshal.FinalReleaseComObject(c1);
-                        Marshal.FinalReleaseComObject(c2);
                         Marshal.FinalReleaseComObject(range);
 
                         Marshal.FinalReleaseComObject(objWorksheet);
@@ -408,12 +448,6 @@ namespace JSON_ExcelDirectionalConverter
                         Marshal.ReleaseComObject(range);
                         Marshal.ReleaseComObject(objWorksheet);
 
-                        objWorksheet = (Excel.Worksheet)objWorksheets[2];
-                        range = objWorksheet.UsedRange;
-                        sheet2ValueArray = (object[,])range.get_Value(missing);
-                        Marshal.FinalReleaseComObject(range);
-                        Marshal.FinalReleaseComObject(objWorksheet);
-
                         Marshal.FinalReleaseComObject(objWorksheets);
 
                         objWorkbook.Close(false, missing, missing);
@@ -430,16 +464,16 @@ namespace JSON_ExcelDirectionalConverter
                         // ** sheet1, sheet2 object 이중배열의 데이터를 JSON 태그 클래스의 객체에 입력
                         // * topTag 객체 데이터 입력
                         EtopTag = new ETRI_TopTag();
-                        EtopTag.version = sheet2ValueArray[2, 2] == null ? "" : sheet2ValueArray[2, 2].ToString();
-                        EtopTag.creator = sheet2ValueArray[2, 3] == null ? "" : sheet2ValueArray[2, 3].ToString();
+                        EtopTag.version = sheet1ValueArray[2, 2] == null ? "" : sheet1ValueArray[2, 2].ToString();
+                        EtopTag.creator = sheet1ValueArray[2, 3] == null ? "" : sheet1ValueArray[2, 3].ToString();
 
                         EtopTag.data = new List<object>();
 
                         // * topTag 객체 내의 Data 객체 리스트 입력
                         IList<object> titleList = new List<object>();
-                        for (int r = 2; r <= sheet2ValueArray.GetLength(0); r++)
+                        for (int r = 2; r <= sheet1ValueArray.GetLength(0); r++)
                         {
-                            object tempTitle = sheet2ValueArray[r, 10];
+                            object tempTitle = sheet1ValueArray[r, 10];
                             if (!titleList.Any())   // 리스트에 아무것도 없을때 (=맨처음)
                             {
                                 titleList.Add(tempTitle);
@@ -453,6 +487,11 @@ namespace JSON_ExcelDirectionalConverter
                                 continue;
                             }
 
+                            if (!titleList.Contains(tempTitle))
+                            {
+                                titleList.Clear();
+                                titleList.Add(tempTitle);
+                            }
                             ETRI_Data tempData = new ETRI_Data();
                             tempData.title = tempTitle == null ? "" : tempTitle.ToString();
                             tempData.paragraphs = new List<object>();
@@ -462,26 +501,26 @@ namespace JSON_ExcelDirectionalConverter
 
                         // * topTag->Data 객체 리스트 내의 Paragraphs 객체 리스트 입력
                         int dataCount = 0;
-                        object currentTitle = sheet2ValueArray[2, 10];
+                        object currentTitle = sheet1ValueArray[2, 10];
                         List<ETRI_Data> tempDataList = EtopTag.data.Cast<ETRI_Data>().ToList();
-                        for (int r = 2; r <= sheet2ValueArray.GetLength(0); r++)
+                        for (int r = 2; r <= sheet1ValueArray.GetLength(0); r++)
                         {
                             ETRI_Paragraphs tempParagraphs = new ETRI_Paragraphs();
-                            tempParagraphs.context = sheet2ValueArray[r, 11] == null ? "" : sheet2ValueArray[r, 11].ToString();
-                            tempParagraphs.context_en = sheet2ValueArray[r, 12] == null ? "" : sheet2ValueArray[r, 12].ToString();
-                            tempParagraphs.context_tagged = sheet2ValueArray[r, 13] == null ? "" : sheet2ValueArray[r, 13].ToString();
+                            tempParagraphs.context = sheet1ValueArray[r, 11] == null ? "" : sheet1ValueArray[r, 11].ToString();
+                            tempParagraphs.context_en = sheet1ValueArray[r, 12] == null ? "" : sheet1ValueArray[r, 12].ToString();
+                            tempParagraphs.context_tagged = sheet1ValueArray[r, 13] == null ? "" : sheet1ValueArray[r, 13].ToString();
                             tempParagraphs.qas = new List<object>();
 
-                            if (sheet2ValueArray[r, 10] == null || sheet2ValueArray[r, 7].ToString() == "")
+                            if (sheet1ValueArray[r, 10] == null || sheet1ValueArray[r, 7].ToString() == "")
                             {
                                 if (r != 2)
                                 {
                                     dataCount++;
                                 }
                                 tempDataList[dataCount].paragraphs.Add(tempParagraphs);
-                                currentTitle = sheet2ValueArray[r, 10] == null ? "" : sheet2ValueArray[r, 7].ToString();
+                                currentTitle = sheet1ValueArray[r, 10] == null ? "" : sheet1ValueArray[r, 7].ToString();
                             }
-                            else if (sheet2ValueArray[r, 10] == currentTitle)
+                            else if (sheet1ValueArray[r, 10].Equals(currentTitle))
                             {
                                 tempDataList[dataCount].paragraphs.Add(tempParagraphs);
                             }
@@ -489,7 +528,7 @@ namespace JSON_ExcelDirectionalConverter
                             {
                                 dataCount++;
                                 tempDataList[dataCount].paragraphs.Add(tempParagraphs);
-                                currentTitle = sheet2ValueArray[r, 10].ToString();
+                                currentTitle = sheet1ValueArray[r, 10].ToString();
                             }
                         }
                         EtopTag.data = tempDataList.Cast<object>().ToList();
@@ -522,27 +561,7 @@ namespace JSON_ExcelDirectionalConverter
                             tempAnswers.answer_end = Convert.ToInt32(sheet1ValueArray[r, ansStartColNum + 5]);
 
                             List<ETRI_Answers> tempAnswersList = new List<ETRI_Answers>();
-                            /*
-                            // * topTag->Data->Paragraphs->Qas 객체 리스트 내의 Answers 객체 리스트 입력
-                            for (int i = 0; i < 3; i++)
-                            {
-                                int ansStartColNum = 32;//18
-                                if (sheet1ValueArray[r, ansStartColNum] == null)
-                                {
-                                    break;      // 정답의 text 공백이면 없음 처리
-                                }
 
-                                ETRI_Answers tempAnswers = new ETRI_Answers();
-                                tempAnswers.text = sheet1ValueArray[r, ansStartColNum] == null ? null : sheet1ValueArray[r, ansStartColNum].ToString();
-                                tempAnswers.text_en = sheet1ValueArray[r, ansStartColNum + 1] == null ? null : sheet1ValueArray[r, ansStartColNum + 1].ToString();
-                                tempAnswers.text_tagged = sheet1ValueArray[r, ansStartColNum + 2] == null ? null : sheet1ValueArray[r, ansStartColNum + 2].ToString();
-                                tempAnswers.text_syn = sheet1ValueArray[r, ansStartColNum + 3] == null ? null : sheet1ValueArray[r, ansStartColNum + 3].ToString();
-                                tempAnswers.answer_start = Convert.ToInt32(sheet1ValueArray[r, ansStartColNum + 4]);
-                                tempAnswers.answer_end = Convert.ToInt32(sheet1ValueArray[r, ansStartColNum + 5]);
-
-
-                                tempAnswersList.Add(tempAnswers);
-                            }*/
                             tempAnswersList.Add(tempAnswers);
                             tempQas.answers = tempAnswersList.Cast<object>().ToList();
 
@@ -632,11 +651,11 @@ namespace JSON_ExcelDirectionalConverter
                         objApp = null;
                     }
 
-                    return "예외처리 된 오류 발생.\r\n파일: " + m_path;
+
+                    return "예외처리 된 오류 발생.\r\n파일: " + m_path + "오류 이유:" + e.ToString();
                 }
             }
             return "모든 파일 변환 성공";
         }
-
     }
 }

@@ -41,19 +41,6 @@ C:\Users\ChunSo\Documents\카카오톡 받은 파일\JSON-E~4\JSON-ExcelDirectio
 C:\Users\ChunSo\Documents\카카오톡 받은 파일\JSON-E~4\JSON-ExcelDirectionalConverter\obj\Debug\JSON-ExcelDirectionalConverter.csproj.ResolveComReference.cache
 C:\Users\ChunSo\Documents\카카오톡 받은 파일\JSON-E~4\JSON-ExcelDirectionalConverter\obj\Debug\JSON-ExcelDirectionalConverter.exe
 C:\Users\ChunSo\Documents\카카오톡 받은 파일\JSON-E~4\JSON-ExcelDirectionalConverter\obj\Debug\JSON-ExcelDirectionalConverter.pdb
-<<<<<<< HEAD
-C:\Users\Chunso\Desktop\JsonToExcel\JSONtoExcelConverter\JSON-ExcelDirectionalConverter\bin\Debug\JSON-ExcelDirectionalConverter.pdb
-C:\Users\Chunso\Desktop\JsonToExcel\JSONtoExcelConverter\JSON-ExcelDirectionalConverter\bin\Debug\Newtonsoft.Json.dll
-C:\Users\Chunso\Desktop\JsonToExcel\JSONtoExcelConverter\JSON-ExcelDirectionalConverter\bin\Debug\Newtonsoft.Json.xml
-C:\Users\Chunso\Desktop\JsonToExcel\JSONtoExcelConverter\JSON-ExcelDirectionalConverter\obj\Debug\JSON-ExcelDirectionalConverter.csproj.ResolveComReference.cache
-C:\Users\Chunso\Desktop\JsonToExcel\JSONtoExcelConverter\JSON-ExcelDirectionalConverter\obj\Debug\JSON_ExcelDirectionalConverter.Form1.resources
-C:\Users\Chunso\Desktop\JsonToExcel\JSONtoExcelConverter\JSON-ExcelDirectionalConverter\obj\Debug\JSON_ExcelDirectionalConverter.Properties.Resources.resources
-C:\Users\Chunso\Desktop\JsonToExcel\JSONtoExcelConverter\JSON-ExcelDirectionalConverter\obj\Debug\JSON-ExcelDirectionalConverter.csproj.GenerateResource.Cache
-C:\Users\Chunso\Desktop\JsonToExcel\JSONtoExcelConverter\JSON-ExcelDirectionalConverter\obj\Debug\JSON-ExcelDirectionalConverter.pdb
-C:\Users\Chunso\Desktop\JsonToExcel\JSONtoExcelConverter\JSON-ExcelDirectionalConverter\bin\Debug\JSON-ExcelDirectionalConverter.exe.config
-C:\Users\Chunso\Desktop\JsonToExcel\JSONtoExcelConverter\JSON-ExcelDirectionalConverter\bin\Debug\JSON-ExcelDirectionalConverter.exe
-C:\Users\Chunso\Desktop\JsonToExcel\JSONtoExcelConverter\JSON-ExcelDirectionalConverter\obj\Debug\JSON-ExcelDirectionalConverter.exe
-=======
 C:\Users\chunso\Desktop\새 폴더\JSONtoExcelConverter\JSON-ExcelDirectionalConverter\bin\Debug\JSON-ExcelDirectionalConverter.exe.config
 C:\Users\chunso\Desktop\새 폴더\JSONtoExcelConverter\JSON-ExcelDirectionalConverter\bin\Debug\JSON-ExcelDirectionalConverter.exe
 C:\Users\chunso\Desktop\새 폴더\JSONtoExcelConverter\JSON-ExcelDirectionalConverter\bin\Debug\JSON-ExcelDirectionalConverter.pdb
@@ -68,8 +55,17 @@ C:\Users\chunso\Desktop\새 폴더\JSONtoExcelConverter\JSON-ExcelDirectionalCon
 C:\Users\chunso\Desktop\새 폴더\JSONtoExcelConverter\JSON-ExcelDirectionalConverter\obj\Debug\JSON-ExcelDirectionalConverter.csproj.CopyComplete
 C:\Users\chunso\Desktop\새 폴더\JSONtoExcelConverter\JSON-ExcelDirectionalConverter\obj\Debug\JSON-ExcelDirectionalConverter.exe
 C:\Users\chunso\Desktop\새 폴더\JSONtoExcelConverter\JSON-ExcelDirectionalConverter\obj\Debug\JSON-ExcelDirectionalConverter.pdb
->>>>>>> 20e16e810dc98499727c78bb8267cc798fc877af
-C:\Users\Chunso\Desktop\JsonToExcel 1.0.0\JSONtoExcelConverter\JSON-ExcelDirectionalConverter\bin\Debug\JSON-ExcelDirectionalConverter.exe.config
-C:\Users\Chunso\Desktop\JsonToExcel 1.0.0\JSONtoExcelConverter\JSON-ExcelDirectionalConverter\obj\Debug\JSON-ExcelDirectionalConverter.csproj.ResolveComReference.cache
-C:\Users\Chunso\Desktop\JsonToExcel 1.0.0\JSONtoExcelConverter\JSON-ExcelDirectionalConverter\obj\Debug\JSON-ExcelDirectionalConverter.exe
-C:\Users\Chunso\Desktop\JsonToExcel 1.0.0\JSONtoExcelConverter\JSON-ExcelDirectionalConverter\obj\Debug\JSON-ExcelDirectionalConverter.pdb
+C:\Users\chunso\Desktop\Project\JsonToExcel_git\JSONtoExcelConverter\JSON-ExcelDirectionalConverter\bin\Debug\JSON-ExcelDirectionalConverter.exe.config
+C:\Users\chunso\Desktop\Project\JsonToExcel_git\JSONtoExcelConverter\JSON-ExcelDirectionalConverter\bin\Debug\JSON-ExcelDirectionalConverter.exe
+C:\Users\chunso\Desktop\Project\JsonToExcel_git\JSONtoExcelConverter\JSON-ExcelDirectionalConverter\bin\Debug\JSON-ExcelDirectionalConverter.pdb
+C:\Users\chunso\Desktop\Project\JsonToExcel_git\JSONtoExcelConverter\JSON-ExcelDirectionalConverter\bin\Debug\Newtonsoft.Json.dll
+C:\Users\chunso\Desktop\Project\JsonToExcel_git\JSONtoExcelConverter\JSON-ExcelDirectionalConverter\bin\Debug\Newtonsoft.Json.xml
+C:\Users\chunso\Desktop\Project\JsonToExcel_git\JSONtoExcelConverter\JSON-ExcelDirectionalConverter\obj\Debug\JSON-ExcelDirectionalConverter.csprojAssemblyReference.cache
+C:\Users\chunso\Desktop\Project\JsonToExcel_git\JSONtoExcelConverter\JSON-ExcelDirectionalConverter\obj\Debug\JSON-ExcelDirectionalConverter.csproj.ResolveComReference.cache
+C:\Users\chunso\Desktop\Project\JsonToExcel_git\JSONtoExcelConverter\JSON-ExcelDirectionalConverter\obj\Debug\JSON_ExcelDirectionalConverter.Form1.resources
+C:\Users\chunso\Desktop\Project\JsonToExcel_git\JSONtoExcelConverter\JSON-ExcelDirectionalConverter\obj\Debug\JSON_ExcelDirectionalConverter.Properties.Resources.resources
+C:\Users\chunso\Desktop\Project\JsonToExcel_git\JSONtoExcelConverter\JSON-ExcelDirectionalConverter\obj\Debug\JSON-ExcelDirectionalConverter.csproj.GenerateResource.cache
+C:\Users\chunso\Desktop\Project\JsonToExcel_git\JSONtoExcelConverter\JSON-ExcelDirectionalConverter\obj\Debug\JSON-ExcelDirectionalConverter.csproj.CoreCompileInputs.cache
+C:\Users\chunso\Desktop\Project\JsonToExcel_git\JSONtoExcelConverter\JSON-ExcelDirectionalConverter\obj\Debug\JSON-ExcelDirectionalConverter.csproj.CopyComplete
+C:\Users\chunso\Desktop\Project\JsonToExcel_git\JSONtoExcelConverter\JSON-ExcelDirectionalConverter\obj\Debug\JSON-ExcelDirectionalConverter.exe
+C:\Users\chunso\Desktop\Project\JsonToExcel_git\JSONtoExcelConverter\JSON-ExcelDirectionalConverter\obj\Debug\JSON-ExcelDirectionalConverter.pdb

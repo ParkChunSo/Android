@@ -52,6 +52,8 @@
   <ItemGroup>
     <Compile Include="CrossJEConverter_v2.cs" />
     <Compile Include="CrossJEConverter.cs" />
+    <Compile Include="CrossJEConverter_v3.cs" />
+    <Compile Include="CrossJEConverter_v4.cs" />
     <Compile Include="CtagClasses\Answers.cs" />
     <Compile Include="CtagClasses\Data.cs" />
     <Compile Include="CtagClasses\Paragraphs.cs" />
@@ -68,6 +70,7 @@
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
+    <Compile Include="JEConverter.cs" />
     <Compile Include="WorkJEConverter.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

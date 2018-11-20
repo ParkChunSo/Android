@@ -48,7 +48,7 @@
             this.btn_convert.Font = new System.Drawing.Font("굴림", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.btn_convert.Location = new System.Drawing.Point(242, 258);
             this.btn_convert.Name = "btn_convert";
-            this.btn_convert.Size = new System.Drawing.Size(171, 32);
+            this.btn_convert.Size = new System.Drawing.Size(171, 28);
             this.btn_convert.TabIndex = 15;
             this.btn_convert.Text = "변환";
             this.btn_convert.UseVisualStyleBackColor = true;
@@ -161,7 +161,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(426, 298);
+            this.ClientSize = new System.Drawing.Size(436, 298);
             this.Controls.Add(this.btn_convert);
             this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.groupBox2);

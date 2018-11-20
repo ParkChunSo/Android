@@ -35,7 +35,6 @@ namespace JSON_ExcelDirectionalConverter
             btn_clearList.Enabled = true;
             btn_convert.Enabled = true;
             btn_removeFiles.Enabled = true;
-            
 
             lb_fileList.Items.Clear();
             filePathList.Clear();
@@ -114,7 +113,7 @@ namespace JSON_ExcelDirectionalConverter
 
                 Cursor.Current = Cursors.WaitCursor;
 
-                CrossJEConverter_v2 jeConverter = new CrossJEConverter_v2(currentCuonvertingMode, null);
+                CrossJEConverter_v3 jeConverter = new CrossJEConverter_v3(currentCuonvertingMode, null);
                 MessageBox.Show(jeConverter.convertFiles(filePathList));
 
                 Cursor.Current = Cursors.Default;
